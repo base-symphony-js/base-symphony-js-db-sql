@@ -1,0 +1,15 @@
+BEGIN TRY
+    BEGIN TRANSACTION;
+
+    -- DROP TABLES
+    DROP TABLE [dbo].[Users];
+    DROP TABLE [dbo].[Roles];
+
+    -- COMMIT
+    COMMIT TRANSACTION;
+    PRINT '> The tables have been deleted';
+    END TRY
+BEGIN CATCH
+    ROLLBACK TRANSACTION;
+    PRINT ERROR_MESSAGE();
+END CATCH

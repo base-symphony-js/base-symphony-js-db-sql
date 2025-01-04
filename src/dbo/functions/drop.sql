@@ -1,0 +1,15 @@
+BEGIN TRY
+    BEGIN TRANSACTION;
+
+    -- DROP FUNCTIONS
+    DROP FUNCTION [dbo].[rn_users]
+    DROP FUNCTION [dbo].[rn_roles]
+
+    -- COMMIT
+    COMMIT TRANSACTION;
+    PRINT '> The functions have been deleted';
+    END TRY
+BEGIN CATCH
+    ROLLBACK TRANSACTION;
+    PRINT ERROR_MESSAGE();
+END CATCH

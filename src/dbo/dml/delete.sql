@@ -1,0 +1,15 @@
+BEGIN TRY
+    BEGIN TRANSACTION;
+
+    DELETE FROM [dbo].[Users];
+    DBCC CHECKIDENT('dbo.Users', RESEED, 0);
+    DELETE FROM [dbo].[Roles];
+    DBCC CHECKIDENT('dbo.Roles', RESEED, 0);
+
+    COMMIT TRANSACTION;
+    PRINT '> The tables have been emptied.';
+    END TRY
+BEGIN CATCH
+    ROLLBACK TRANSACTION;
+    PRINT ERROR_MESSAGE();
+END CATCH
