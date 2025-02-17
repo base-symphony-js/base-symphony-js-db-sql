@@ -141,6 +141,9 @@ if [ "$selection" -eq 0 ]; then
 fi
 
 if [ "$selection" -eq 0 ] || [ "$selection" -eq 1 ]; then
+    echo "Create or update VIEWS."
+    run_sqlcmd "src/dbo/views/vw_uers_and_roles.sql"
+
     echo "Create or update FUNCTIONS."
     run_sqlcmd "src/dbo/functions/rn_roles.sql"
     run_sqlcmd "src/dbo/functions/rn_users.sql"
@@ -148,9 +151,6 @@ if [ "$selection" -eq 0 ] || [ "$selection" -eq 1 ]; then
     echo "Create or update STORED PROCEDURES."
     run_sqlcmd "src/dbo/sp/sp_roles.sql"
     run_sqlcmd "src/dbo/sp/sp_users.sql"
-
-    echo "Create or update VIEWS."
-    run_sqlcmd "src/dbo/views/vw_uers_and_roles.sql"
 fi
 
 if [ "$selection" -eq 2 ]; then
