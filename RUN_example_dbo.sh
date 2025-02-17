@@ -125,51 +125,42 @@ fi
 clear
 
 
-# ===========================
-# Section to save script path
-# ===========================
-# SCHEMA: dbo
-# ddl
-PATH_dbo_ddl_create="src/dbo/ddl/create.sql"
-PATH_dbo_ddl_drop="src/dbo/ddl/drop.sql"
-# dml
-PATH_dbo_dml_insert="src/dbo/dml/insert.sql"
-# fn
-PATH_dbo_fn_rn_roles="src/dbo/functions/rn_roles.sql"
-PATH_dbo_fn_rn_users="src/dbo/functions/rn_users.sql"
-PATH_dbo_fn_drop="src/dbo/functions/drop.sql"
-# sp
-PATH_dbo_sp_sp_roles="src/dbo/sp/sp_roles.sql"
-PATH_dbo_sp_sp_users="src/dbo/sp/sp_users.sql"
-PATH_dbo_sp_drop="src/dbo/sp/drop.sql"
 # ==========================
 # Section to run the scripts
 # ==========================
+# Función para ejecutar sqlcmd
+run_sqlcmd() {
+    local path=$1
+    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$path" -b -f 65001
+}
+
 if [ "$selection" -eq 0 ]; then
     echo "Create the entire database from 0."
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_ddl_create" -b -f 65001
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_dml_insert" -b -f 65001
-    echo "Create FUNCTIONS and STORED PROCEDURES."
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_fn_rn_roles" -b -f 65001
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_fn_rn_users" -b -f 65001
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_sp_sp_roles" -b -f 65001
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_sp_sp_users" -b -f 65001
+    run_sqlcmd "src/dbo/ddl/create.sql"
+    run_sqlcmd "src/dbo/dml/insert.sql"
 fi
 
-if [ "$selection" -eq 1 ]; then
-    echo "Update FUNCTIONS and STORED PROCEDURES."
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_fn_rn_roles" -b -f 65001
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_fn_rn_users" -b -f 65001
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_sp_sp_roles" -b -f 65001
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_sp_sp_users" -b -f 65001
+if [ "$selection" -eq 0 ] || [ "$selection" -eq 1 ]; then
+    echo "Create or update FUNCTIONS."
+    run_sqlcmd "src/dbo/functions/rn_roles.sql"
+    run_sqlcmd "src/dbo/functions/rn_users.sql"
+
+    echo "Create or update STORED PROCEDURES."
+    run_sqlcmd "src/dbo/sp/sp_roles.sql"
+    run_sqlcmd "src/dbo/sp/sp_users.sql"
+
+    echo "Create or update VIEWS."
+    run_sqlcmd "src/dbo/views/vw_uers_and_roles.sql"
 fi
 
 if [ "$selection" -eq 2 ]; then
     echo "Delete the entire database."
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_sp_drop" -f 65001
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_fn_drop" -f 65001
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_dbo_ddl_drop" -f 65001
+    run_sqlcmd "src/dbo/sp/drop.sql"
+    run_sqlcmd "src/dbo/functions/drop.sql"
+    run_sqlcmd "src/dbo/views/drop.sql"
+    run_sqlcmd "src/dbo/ddl/drop.sql"
 fi
+
 
 echo "Execution completed."
 echo ""

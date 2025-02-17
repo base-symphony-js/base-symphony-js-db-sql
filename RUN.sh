@@ -124,27 +124,23 @@ fi
 clear
 
 
-# ===========================
-# Section to save script path
-# ===========================
-# SCHEMA: security
-# ddl
-PATH_security_ddl_create="src/security/ddl/create.sql"
-PATH_security_ddl_drop="src/security/ddl/drop.sql"
-# dml
-PATH_security_dml_insert="src/security/dml/insert.sql"
 # ==========================
 # Section to run the scripts
 # ==========================
+run_sqlcmd() {
+    local path=$1
+    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$path" -b -f 65001
+}
+
 if [ "$selection" -eq 0 ]; then
     echo "Create the entire database from 0."
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_security_ddl_create" -b -f 65001
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_security_dml_insert" -b -f 65001
+    run_sqlcmd "src/security/ddl/create.sql"
+    run_sqlcmd "src/security/dml/insert.sql"
 fi
 
 if [ "$selection" -eq 1 ]; then
     echo "Delete the entire database."
-    sqlcmd -S "$DB_SERVER_NAME" -U "$DB_USERNAME" -P "$DB_PASSWORD" -d "$DB_DATABASE_NAME" -i "$PATH_security_ddl_drop" -f 65001
+    run_sqlcmd "src/security/ddl/drop.sql"
 fi
 
 echo "Execution completed."
